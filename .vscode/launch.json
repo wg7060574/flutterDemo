@@ -1,0 +1,32 @@
+{
+  // 使用 IntelliSense 了解相关属性。 
+  // 悬停以查看现有属性的描述。
+  // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "demo01",
+      "cwd": "demo01",
+      "request": "launch",
+      "type": "dart"
+    },
+    {
+      "name": "demo02",
+      "cwd": "demo02",
+      "request": "launch",
+      "type": "dart"
+    },
+    {
+      "name": "demo03",
+      "cwd": "demo03",
+      "request": "launch",
+      "type": "dart"
+    },
+    {
+      "name": "demo04",
+      "cwd": "demo04",
+      "request": "launch",
+      "type": "dart"
+    }
+  ]
+}
