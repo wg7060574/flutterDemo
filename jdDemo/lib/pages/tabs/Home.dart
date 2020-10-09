@@ -4,13 +4,16 @@
  * @Author: wg
  * @Date: 2020-09-21 14:28:33
  * @LastEditors: wg
- * @LastEditTime: 2020-09-21 17:43:35
+ * @LastEditTime: 2020-10-09 17:44:24
  */
 import 'package:flutter/material.dart';
 
 import 'package:flutter_swiper/flutter_swiper.dart';
 
 import '../../service/ScreenAdaper.dart';
+import 'package:dio/dio.dart';
+
+import '../../model/FocusModel.dart'; // 轮播图类模型
 
 class HomePage extends StatefulWidget {
   HomePage({Key key}) : super(key: key);
@@ -20,40 +23,51 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List list = [
-    {
-      'url':
-          "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1600682850184&di=319667e64948c74bbc5c92072386a01e&imgtype=0&src=http%3A%2F%2Fcdn.duitang.com%2Fuploads%2Fitem%2F201601%2F06%2F20160106171654_cjuPe.jpeg"
-    },
-    {
-      'url':
-          "https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=1092177149,2971090965&fm=26&gp=0.jpg"
-    },
-    {
-      'url':
-          "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1600682637968&di=941cbb19767900af77404c9d32868736&imgtype=0&src=http%3A%2F%2Finews.gtimg.com%2Fnewsapp_bt%2F0%2F12476885884%2F641"
-    }
-  ];
+  List _focusModel = [];
 
-  Widget _swiperWidget() {
-    return Container(
-      child: AspectRatio(
-        aspectRatio: 16 / 9,
-        child: Swiper(
-          itemBuilder: (BuildContext context, int index) {
-            return new Image.network(
-              this.list[index]['url'],
-              fit: BoxFit.cover,
-            );
-          },
-          itemCount: this.list.length,
-          autoplay: true,
-          pagination: new SwiperPagination(),
-        ),
-      ),
-    );
+  @override
+  void initState() {
+    super.initState();
+    this._getSwiperData();
   }
 
+  // 获取轮播图
+  _getSwiperData() async {
+    var url = 'http://jd.itying.com/api/focus';
+
+    var result = await Dio().get(url);
+    var focusList = FocusModel.fromJson(result.data);
+    setState(() {
+      this._focusModel = focusList.result;
+    });
+  }
+
+  // 轮播图
+  Widget _swiperWidget() {
+    if (this._focusModel.length > 0) {
+      return Container(
+        child: AspectRatio(
+          aspectRatio: 16 / 9,
+          child: Swiper(
+            itemBuilder: (BuildContext context, int index) {
+              String pic = this._focusModel[index].pic;
+              return new Image.network(
+                'http://jd.itying.com/${pic.replaceAll("\\", '/')}',
+                fit: BoxFit.cover,
+              );
+            },
+            itemCount: this._focusModel.length,
+            autoplay: true,
+            pagination: new SwiperPagination(),
+          ),
+        ),
+      );
+    } else {
+      return Text('加载中。。。');
+    }
+  }
+
+  // 标题
   Widget _titleWidget(String title) {
     return Container(
       margin: EdgeInsets.all(ScreenAdaper.width(20)),
@@ -70,6 +84,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // 猜你喜欢
   Widget _guessProductListWidget() {
     return Container(
       margin: EdgeInsets.only(
@@ -99,6 +114,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // 热门推荐
   Widget _hotProductListWidget() {
     return Container(
       padding: EdgeInsets.only(
@@ -118,6 +134,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // 热门推荐item
   Widget _hotProductItemWidget() {
     double itemWidth =
         (ScreenAdaper.getScreenWidth() - ScreenAdaper.width(20) * 3) / 2;
