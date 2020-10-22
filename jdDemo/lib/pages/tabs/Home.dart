@@ -4,7 +4,7 @@
  * @Author: wg
  * @Date: 2020-09-21 14:28:33
  * @LastEditors: wg
- * @LastEditTime: 2020-10-09 17:44:24
+ * @LastEditTime: 2020-10-22 10:59:16
  */
 import 'package:flutter/material.dart';
 
@@ -14,6 +14,9 @@ import '../../service/ScreenAdaper.dart';
 import 'package:dio/dio.dart';
 
 import '../../model/FocusModel.dart'; // 轮播图类模型
+import '../../model/ProductModel.dart'; // 轮播图类模型
+
+import '../../config/Config.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key}) : super(key: key);
@@ -24,21 +27,43 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   List _focusModel = [];
-
+  List _guessData = [];
+  List _hotData = [];
   @override
   void initState() {
     super.initState();
     this._getSwiperData();
+    this._getGuessData();
+    this._getHotData();
   }
 
-  // 获取轮播图
+  // 获取轮播图数据
   _getSwiperData() async {
-    var url = 'http://jd.itying.com/api/focus';
-
+    var url = '${Config.apiUrl}api/focus';
     var result = await Dio().get(url);
     var focusList = FocusModel.fromJson(result.data);
     setState(() {
       this._focusModel = focusList.result;
+    });
+  }
+
+  // 获取猜你喜欢数据
+  _getGuessData() async {
+    var url = '${Config.apiUrl}api/plist?is_hot=1';
+    var result = await Dio().get(url);
+    var _guessList = ProductModel.fromJson(result.data);
+    setState(() {
+      this._guessData = _guessList.result;
+    });
+  }
+
+  // 获取热门推荐数据
+  _getHotData() async {
+    var url = '${Config.apiUrl}api/plist?is_best=1';
+    var result = await Dio().get(url);
+    var _hotList = ProductModel.fromJson(result.data);
+    setState(() {
+      this._hotData = _hotList.result;
     });
   }
 
@@ -52,7 +77,7 @@ class _HomePageState extends State<HomePage> {
             itemBuilder: (BuildContext context, int index) {
               String pic = this._focusModel[index].pic;
               return new Image.network(
-                'http://jd.itying.com/${pic.replaceAll("\\", '/')}',
+                '${Config.apiUrl}${pic.replaceAll("\\", '/')}',
                 fit: BoxFit.cover,
               );
             },
@@ -86,32 +111,42 @@ class _HomePageState extends State<HomePage> {
 
   // 猜你喜欢
   Widget _guessProductListWidget() {
-    return Container(
-      margin: EdgeInsets.only(
-          left: ScreenAdaper.width(20), right: ScreenAdaper.width(20)),
-      height: ScreenAdaper.height(180),
-      width: double.infinity,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemBuilder: (context, index) {
-          return Column(
-            children: [
-              Container(
-                width: ScreenAdaper.width(140),
-                height: ScreenAdaper.height(140),
-                margin: EdgeInsets.only(right: ScreenAdaper.width(20)),
-                child: Image.network(
-                  'https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=3129286175,524940541&fm=26&gp=0.jpg',
-                  fit: BoxFit.cover,
+    if (this._guessData.length > 0) {
+      return Container(
+        margin: EdgeInsets.only(
+            left: ScreenAdaper.width(20), right: ScreenAdaper.width(20)),
+        height: ScreenAdaper.height(180),
+        width: double.infinity,
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemBuilder: (context, index) {
+            String pic = this._guessData[index].pic;
+            return Column(
+              children: [
+                Container(
+                  width: ScreenAdaper.width(140),
+                  height: ScreenAdaper.height(140),
+                  margin: EdgeInsets.only(
+                      right: ScreenAdaper.width(10),
+                      left: ScreenAdaper.width(10)),
+                  child: Image.network(
+                    '${Config.apiUrl}${pic.replaceAll("\\", '/')}',
+                    fit: BoxFit.cover,
+                  ),
                 ),
-              ),
-              Text('第${index + 1}条')
-            ],
-          );
-        },
-        itemCount: 10,
-      ),
-    );
+                Text(
+                  '￥${this._guessData[index].price}',
+                  style: TextStyle(color: Colors.red),
+                )
+              ],
+            );
+          },
+          itemCount: this._guessData.length,
+        ),
+      );
+    } else {
+      return Text('加载中...');
+    }
   }
 
   // 热门推荐
@@ -124,18 +159,14 @@ class _HomePageState extends State<HomePage> {
       child: Wrap(
         runSpacing: ScreenAdaper.width(20),
         spacing: ScreenAdaper.width(20),
-        children: [
-          this._hotProductItemWidget(),
-          this._hotProductItemWidget(),
-          this._hotProductItemWidget(),
-          this._hotProductItemWidget()
-        ],
+        children:
+            this._hotData.map((e) => this._hotProductItemWidget(e)).toList(),
       ),
     );
   }
 
   // 热门推荐item
-  Widget _hotProductItemWidget() {
+  Widget _hotProductItemWidget(item) {
     double itemWidth =
         (ScreenAdaper.getScreenWidth() - ScreenAdaper.width(20) * 3) / 2;
     return Container(
@@ -150,14 +181,13 @@ class _HomePageState extends State<HomePage> {
               child: AspectRatio(
                 aspectRatio: 1,
                 child: Image.network(
-                  'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=1115762551,1087844924&fm=26&gp=0.jpg',
+                  '${Config.apiUrl}${item.pic.replaceAll("\\", '/')}',
                   fit: BoxFit.cover,
                 ),
               )),
           Padding(
             padding: EdgeInsets.only(top: ScreenAdaper.width(20)),
-            child: Text(
-                '刘亦菲，1987年8月25日出生于湖北省武汉市，华语影视女演员、歌手，毕业于北京电影学院2002级表演系本科。2002年，因出演电视剧《金粉世家》中白秀珠一角踏入演艺圈。2003年因主演武侠剧《天龙八部》崭露头角',
+            child: Text('${item.title}',
                 maxLines: 2,
                 style: TextStyle(color: Colors.black54),
                 overflow: TextOverflow.ellipsis),
@@ -168,12 +198,12 @@ class _HomePageState extends State<HomePage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '￥188.0',
+                  '￥${item.price}',
                   style: TextStyle(
                       color: Colors.red, fontSize: ScreenAdaper.setSize(32)),
                 ),
                 Text(
-                  '￥288.0',
+                  '￥${item.oldPrice}',
                   style: TextStyle(
                       decoration: TextDecoration.lineThrough,
                       fontSize: ScreenAdaper.setSize(28)),
