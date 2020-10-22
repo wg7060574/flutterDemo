@@ -4,7 +4,7 @@
  * @Author: wg
  * @Date: 2020-09-21 14:27:35
  * @LastEditors: wg
- * @LastEditTime: 2020-09-21 14:58:18
+ * @LastEditTime: 2020-10-22 11:28:46
  */
 import 'package:flutter/material.dart';
 
@@ -21,7 +21,7 @@ class Tabs extends StatefulWidget {
 }
 
 class _TabsState extends State<Tabs> {
-  int _currentIndex = 0;
+  int _currentIndex = 1;
 
   List<Widget> _pageList = [HomePage(), CategoryPage(), CartPage(), UserPage()];
 
