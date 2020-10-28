@@ -4,7 +4,7 @@
  * @Author: wg
  * @Date: 2020-09-21 14:28:33
  * @LastEditors: wg
- * @LastEditTime: 2020-10-28 14:11:36
+ * @LastEditTime: 2020-10-28 15:09:01
  */
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
@@ -120,21 +120,29 @@ class _CategoryPageState extends State<CategoryPage>
             itemCount: this._rightCateList.length,
             itemBuilder: (context, index) {
               String pic = this._rightCateList[index].pic;
-              return Container(
-                child: Column(
-                  children: [
-                    AspectRatio(
-                      aspectRatio: 1 / 1,
-                      child: Image.network(
-                        "${Config.apiUrl}${pic.replaceAll('\\', '/')}",
-                        fit: BoxFit.cover,
+              return InkWell(
+                onTap: () {
+                  Navigator.of(context).pushNamed(
+                    '/productList',
+                    arguments: {'cid': this._rightCateList[index].sId},
+                  );
+                },
+                child: Container(
+                  child: Column(
+                    children: [
+                      AspectRatio(
+                        aspectRatio: 1 / 1,
+                        child: Image.network(
+                          "${Config.apiUrl}${pic.replaceAll('\\', '/')}",
+                          fit: BoxFit.cover,
+                        ),
                       ),
-                    ),
-                    Container(
-                      height: ScreenAdaper.height(40),
-                      child: Text('${this._rightCateList[index].title}'),
-                    )
-                  ],
+                      Container(
+                        height: ScreenAdaper.height(40),
+                        child: Text('${this._rightCateList[index].title}'),
+                      )
+                    ],
+                  ),
                 ),
               );
             },
