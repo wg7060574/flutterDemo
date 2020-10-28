@@ -4,11 +4,14 @@
  * @Author: wg
  * @Date: 2020-09-21 14:28:33
  * @LastEditors: wg
- * @LastEditTime: 2020-10-22 15:04:51
+ * @LastEditTime: 2020-10-23 11:08:22
  */
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
 
 import '../../service/ScreenAdaper.dart';
+import '../../model/PcateModel.dart';
+import '../../config/Config.dart';
 
 class CategoryPage extends StatefulWidget {
   CategoryPage({Key key}) : super(key: key);
@@ -19,6 +22,132 @@ class CategoryPage extends StatefulWidget {
 
 class _CategoryPageState extends State<CategoryPage> {
   int _selectIndex = 0;
+  List _leftCateList = [];
+  List _rightCateList = [];
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    this._getLeftCaseData();
+  }
+
+  // 获取左侧分类数据
+  _getLeftCaseData() async {
+    var api = '${Config.apiUrl}api/pcate';
+    var result = await Dio().get(api);
+    var dataList = PcateModel.fromJson(result.data);
+    setState(() {
+      this._leftCateList = dataList.result;
+    });
+    this._getRightCaseData(dataList.result[0].sId);
+  }
+
+  // 获取右侧分类数据
+  _getRightCaseData(pid) async {
+    var api = '${Config.apiUrl}api/pcate?pid=${pid}';
+    var result = await Dio().get(api);
+    var dataList = PcateModel.fromJson(result.data);
+    setState(() {
+      this._rightCateList = dataList.result;
+    });
+  }
+
+  // 左侧分类
+  Widget _leftCateWidget(leftWidth) {
+    if (this._leftCateList.length > 0) {
+      return Container(
+        height: double.infinity,
+        width: leftWidth,
+        child: ListView.builder(
+          itemBuilder: (context, index) {
+            return Column(
+              children: [
+                InkWell(
+                  onTap: () {
+                    setState(() {
+                      this._selectIndex = index;
+                      this._getRightCaseData(this._leftCateList[index].sId);
+                    });
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    height: ScreenAdaper.height(84),
+                    child: Center(
+                        child: Text('${this._leftCateList[index].title}')),
+                    color: _selectIndex == index
+                        ? Color.fromRGBO(240, 246, 246, 0.9)
+                        : Colors.white,
+                  ),
+                ),
+                Divider(height: 1)
+              ],
+            );
+          },
+          itemCount: this._leftCateList.length,
+        ),
+      );
+    } else {
+      return Container(
+        height: double.infinity,
+        width: leftWidth,
+      );
+    }
+  }
+
+  // 右侧分类
+  Widget _rightCateWidget(rightItemWidth, rightItemHeight) {
+    if (this._rightCateList.length > 0) {
+      return Expanded(
+        flex: 1,
+        child: Container(
+          color: Color.fromRGBO(240, 246, 246, 0.9),
+          height: double.infinity,
+          padding: EdgeInsets.all(10),
+          child: GridView.builder(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+              childAspectRatio: rightItemWidth / rightItemHeight,
+            ),
+            itemCount: this._rightCateList.length,
+            itemBuilder: (context, index) {
+              String pic = this._rightCateList[index].pic;
+              return Container(
+                child: Column(
+                  children: [
+                    AspectRatio(
+                      aspectRatio: 1 / 1,
+                      child: Image.network(
+                        "${Config.apiUrl}${pic.replaceAll('\\', '/')}",
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    Container(
+                      height: ScreenAdaper.height(40),
+                      child: Text('${this._rightCateList[index].title}'),
+                    )
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    } else {
+      return Expanded(
+        flex: 1,
+        child: Container(
+          color: Color.fromRGBO(240, 246, 246, 0.9),
+          height: double.infinity,
+          padding: EdgeInsets.all(10),
+          child: Text('加载中...'),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,74 +160,8 @@ class _CategoryPageState extends State<CategoryPage> {
     var rightItemHeight = rightItemWidth + ScreenAdaper.width(40);
     return Row(
       children: [
-        Container(
-          height: double.infinity,
-          width: leftWidth,
-          child: ListView.builder(
-            itemBuilder: (context, index) {
-              return Column(
-                children: [
-                  InkWell(
-                    onTap: () {
-                      setState(() {
-                        this._selectIndex = index;
-                      });
-                    },
-                    child: Container(
-                      width: double.infinity,
-                      height: ScreenAdaper.height(98),
-                      child: Text(
-                        'list${index}',
-                        textAlign: TextAlign.center,
-                      ),
-                      color: _selectIndex == index
-                          ? Color.fromRGBO(240, 246, 246, 0.9)
-                          : Colors.white,
-                    ),
-                  ),
-                  Divider()
-                ],
-              );
-            },
-            itemCount: 18,
-          ),
-        ),
-        Expanded(
-          child: Container(
-            color: Color.fromRGBO(240, 246, 246, 0.9),
-            height: double.infinity,
-            padding: EdgeInsets.all(10),
-            child: GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                childAspectRatio: rightItemWidth / rightItemHeight,
-              ),
-              itemCount: 10,
-              itemBuilder: (context, index) {
-                return Container(
-                  child: Column(
-                    children: [
-                      AspectRatio(
-                        aspectRatio: 1 / 1,
-                        child: Image.network(
-                          "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1603358099859&di=e3e9d28454a7278f05a275cdca8af0f9&imgtype=0&src=http%3A%2F%2Fa0.att.hudong.com%2F56%2F12%2F01300000164151121576126282411.jpg",
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      Container(
-                        height: ScreenAdaper.height(40),
-                        child: Text('女装'),
-                      )
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-          flex: 1,
-        )
+        this._leftCateWidget(leftWidth),
+        this._rightCateWidget(rightItemWidth, rightItemHeight)
       ],
     );
   }
