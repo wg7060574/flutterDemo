@@ -4,7 +4,7 @@
  * @Author: wg
  * @Date: 2020-09-21 14:28:33
  * @LastEditors: wg
- * @LastEditTime: 2020-10-22 10:59:16
+ * @LastEditTime: 2020-10-28 14:13:08
  */
 import 'package:flutter/material.dart';
 
@@ -25,10 +25,16 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage>
+    with AutomaticKeepAliveClientMixin {
   List _focusModel = [];
   List _guessData = [];
   List _hotData = [];
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
+
   @override
   void initState() {
     super.initState();

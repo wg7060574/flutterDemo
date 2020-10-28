@@ -4,7 +4,7 @@
  * @Author: wg
  * @Date: 2020-09-21 14:28:33
  * @LastEditors: wg
- * @LastEditTime: 2020-10-23 11:08:22
+ * @LastEditTime: 2020-10-28 14:11:36
  */
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
@@ -20,10 +20,15 @@ class CategoryPage extends StatefulWidget {
   _CategoryPageState createState() => _CategoryPageState();
 }
 
-class _CategoryPageState extends State<CategoryPage> {
+class _CategoryPageState extends State<CategoryPage>
+    with AutomaticKeepAliveClientMixin {
   int _selectIndex = 0;
   List _leftCateList = [];
   List _rightCateList = [];
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
