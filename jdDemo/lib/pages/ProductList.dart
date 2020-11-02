@@ -4,11 +4,16 @@
  * @Author: wg
  * @Date: 2020-10-28 14:48:14
  * @LastEditors: wg
- * @LastEditTime: 2020-10-28 16:35:07
+ * @LastEditTime: 2020-11-02 13:47:10
  */
 import 'package:flutter/material.dart';
 import '../service/ScreenAdaper.dart';
 import 'package:dio/dio.dart';
+
+import '../model/ProductModel.dart';
+import '../config/Config.dart';
+
+import '../widget/LoadWidget.dart';
 
 class ProductListPage extends StatefulWidget {
   Map arguments;
@@ -24,80 +29,131 @@ class _ProductListPageState extends State<ProductListPage> {
   // 给scaffold 一个key,通过key 来打开drawer
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
+  // 上拉加载
+  ScrollController _scrollController = ScrollController();
+
+  int _page = 1;
+
+  List _productList = [];
+
+  String _sort = '';
+  // 重复请求
+  bool _flag = true;
+
+  // 判断是否还有数据
+  bool _hasMore = true;
+
+  @override
+  void initState() {
+    super.initState();
+    this._getData();
+
+    // 监听滚动条事件
+    _scrollController.addListener(() {
+      // 滚动高度 === 页面高度
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        if (this._flag == true) {
+          this._getData();
+        }
+      }
+    });
+  }
+
+  // 获取列表数据
+  _getData() async {
+    if (this._hasMore == true) {
+      setState(() {
+        this._flag = false;
+      });
+      var api =
+          '${Config.apiUrl}api/plist?cid=${widget.arguments["cid"]}&page=${this._page}&pageSize=10&sort=${this._sort}';
+      var result = await Dio().get(api);
+      var dataList = ProductModel.fromJson(result.data);
+      print(dataList.result.length);
+      if (dataList.result.length < 10) {
+        setState(() {
+          this._productList.addAll(dataList.result);
+          this._flag = true;
+          this._hasMore = false;
+        });
+      }
+      setState(() {
+        this._productList.addAll(dataList.result);
+        this._page++;
+        this._flag = true;
+      });
+    }
+  }
+
+  // 展示更多
+  Widget _showMore(index) {
+    if (this._hasMore) {
+      return index == this._productList.length - 1 ? LoadWidget() : Text('');
+    } else {
+      return index == this._productList.length - 1
+          ? Text('---我是有底线的----')
+          : Text('');
+    }
+  }
+
 // 商品列表
   Widget _productListWidget() {
-    return Container(
-      padding: EdgeInsets.all(10),
-      margin: EdgeInsets.only(top: ScreenAdaper.height(80)),
-      child: ListView.builder(
-        itemCount: 10,
-        itemBuilder: (context, index) {
-          return Column(
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: ScreenAdaper.width(180),
-                    height: ScreenAdaper.height(180),
-                    child: Image.network(
-                      'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=1705581946,4177791147&fm=26&gp=0.jpg',
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: Container(
+    if (this._productList.length > 0) {
+      return Container(
+        padding: EdgeInsets.all(10),
+        margin: EdgeInsets.only(top: ScreenAdaper.height(80)),
+        child: ListView.builder(
+          controller: this._scrollController,
+          itemCount: this._productList.length,
+          itemBuilder: (context, index) {
+            String pic = this._productList[index].pic;
+            pic = Config.apiUrl + pic.replaceAll('\\', '/');
+            return Column(
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: ScreenAdaper.width(180),
                       height: ScreenAdaper.height(180),
-                      padding: EdgeInsets.only(left: 10),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '商品商品商品商品商品商品商品商品商品商品商品商品商品商品商品商品商品商品商品商品商品商品商品商品商品',
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          Row(
-                            children: [
-                              Container(
-                                height: ScreenAdaper.height(36),
-                                margin: EdgeInsets.only(right: 10),
-                                padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  color: Color.fromRGBO(230, 230, 230, 0.9),
-                                ),
-                                child: Text('3G'),
-                              ),
-                              Container(
-                                height: ScreenAdaper.height(36),
-                                margin: EdgeInsets.only(right: 10),
-                                padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  color: Color.fromRGBO(230, 230, 230, 0.9),
-                                ),
-                                child: Text('科技'),
-                              )
-                            ],
-                          ),
-                          Text(
-                            '￥999',
-                            style: TextStyle(color: Colors.red),
-                          ),
-                        ],
+                      child: Image.network(pic, fit: BoxFit.cover),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Container(
+                        height: ScreenAdaper.height(180),
+                        padding: EdgeInsets.only(left: 10),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${this._productList[index].title}',
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text('￥${this._productList[index].price}',
+                                style: TextStyle(color: Colors.red)),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              Divider()
-            ],
-          );
-        },
-      ),
-    );
+                  ],
+                ),
+                Divider(),
+                this._showMore(index)
+              ],
+            );
+          },
+        ),
+      );
+    } else {
+      return Container(
+        padding: EdgeInsets.all(10),
+        margin: EdgeInsets.only(top: ScreenAdaper.height(80)),
+        child: LoadWidget(),
+      );
+    }
   }
 
   // 筛选导航
