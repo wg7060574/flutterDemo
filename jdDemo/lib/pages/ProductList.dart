@@ -4,7 +4,7 @@
  * @Author: wg
  * @Date: 2020-10-28 14:48:14
  * @LastEditors: wg
- * @LastEditTime: 2020-11-02 13:47:10
+ * @LastEditTime: 2020-11-04 13:27:26
  */
 import 'package:flutter/material.dart';
 import '../service/ScreenAdaper.dart';
@@ -25,7 +25,7 @@ class ProductListPage extends StatefulWidget {
 }
 
 class _ProductListPageState extends State<ProductListPage> {
-  int _selectIndex = 0;
+  int _selectIndex = 1;
   // 给scaffold 一个key,通过key 来打开drawer
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
@@ -42,6 +42,13 @@ class _ProductListPageState extends State<ProductListPage> {
 
   // 判断是否还有数据
   bool _hasMore = true;
+
+  List _subHeaderList = [
+    {'id': 1, 'title': "综合", 'fileds': '', 'sort': -1},
+    {'id': 2, 'title': "销量", 'fileds': "salecount", 'sort': -1},
+    {'id': 3, 'title': "价格", 'fileds': "price", 'sort': -1},
+    {'id': 4, 'title': "筛选"}
+  ];
 
   @override
   void initState() {
@@ -70,7 +77,6 @@ class _ProductListPageState extends State<ProductListPage> {
           '${Config.apiUrl}api/plist?cid=${widget.arguments["cid"]}&page=${this._page}&pageSize=10&sort=${this._sort}';
       var result = await Dio().get(api);
       var dataList = ProductModel.fromJson(result.data);
-      print(dataList.result.length);
       if (dataList.result.length < 10) {
         setState(() {
           this._productList.addAll(dataList.result);
@@ -97,7 +103,7 @@ class _ProductListPageState extends State<ProductListPage> {
     }
   }
 
-// 商品列表
+  // 商品列表
   Widget _productListWidget() {
     if (this._productList.length > 0) {
       return Container(
@@ -156,6 +162,48 @@ class _ProductListPageState extends State<ProductListPage> {
     }
   }
 
+  // 导航改变触发
+  _subHeaderChange(id) {
+    if (id == 4) {
+      // 打开侧边栏
+      this._scaffoldKey.currentState.openEndDrawer();
+    } else {
+      setState(() {
+        this._selectIndex = id;
+
+        if (id != 1) {
+          this._sort =
+              '${this._subHeaderList[id - 1]['fileds']}_${this._subHeaderList[id - 1]['sort']}';
+
+          this._subHeaderList[id - 1]['sort'] =
+              this._subHeaderList[id - 1]['sort'] * -1;
+        } else {
+          this._sort = '';
+        }
+        // 重置分页
+        this._page = 1;
+        // 重置数据
+        this._productList = [];
+        this._hasMore = true;
+        // 请求数据
+        this._getData();
+      });
+    }
+  }
+
+  // icon展示
+  Widget _showIcon(id) {
+    if (id == 1 || id == 4) {
+      return Text('');
+    } else {
+      if (this._subHeaderList[id - 1]['sort'] == 1) {
+        return Icon(Icons.arrow_drop_down);
+      } else {
+        return Icon(Icons.arrow_drop_up);
+      }
+    }
+  }
+
   // 筛选导航
   Widget _subHeaderWidget() {
     return Positioned(
@@ -173,85 +221,29 @@ class _ProductListPageState extends State<ProductListPage> {
             ),
           ),
           child: Row(
-            children: [
-              Expanded(
-                  flex: 1,
-                  child: InkWell(
-                      onTap: () {
-                        setState(() {
-                          this._selectIndex = 0;
-                        });
-                      },
-                      child: Container(
-                        padding: EdgeInsets.fromLTRB(0, ScreenAdaper.height(18),
-                            0, ScreenAdaper.height(18)),
-                        child: Text(
-                          '综合',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: this._selectIndex == 0
-                                  ? Colors.red
-                                  : Colors.black),
-                        ),
-                      ))),
-              Expanded(
-                  flex: 1,
-                  child: InkWell(
-                      onTap: () {
-                        setState(() {
-                          this._selectIndex = 1;
-                        });
-                      },
-                      child: Container(
-                        padding: EdgeInsets.fromLTRB(0, ScreenAdaper.height(18),
-                            0, ScreenAdaper.height(18)),
-                        child: Text(
-                          '销量',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: this._selectIndex == 1
-                                  ? Colors.red
-                                  : Colors.black),
-                        ),
-                      ))),
-              Expanded(
-                  flex: 1,
-                  child: InkWell(
+              children: this._subHeaderList.map((v) {
+            return Expanded(
+                flex: 1,
+                child: InkWell(
                     onTap: () {
-                      setState(() {
-                        this._selectIndex = 2;
-                      });
+                      this._subHeaderChange(v['id']);
                     },
                     child: Container(
-                      padding: EdgeInsets.fromLTRB(0, ScreenAdaper.height(18),
-                          0, ScreenAdaper.height(18)),
-                      child: Text(
-                        '价格',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            color: this._selectIndex == 2
-                                ? Colors.red
-                                : Colors.black),
-                      ),
-                    ),
-                  )),
-              Expanded(
-                  flex: 1,
-                  child: InkWell(
-                    onTap: () {
-                      _scaffoldKey.currentState.openEndDrawer();
-                    },
-                    child: Container(
-                      padding: EdgeInsets.fromLTRB(0, ScreenAdaper.height(18),
-                          0, ScreenAdaper.height(18)),
-                      child: Text(
-                        '筛选',
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  )),
-            ],
-          )),
+                        padding: EdgeInsets.fromLTRB(0, ScreenAdaper.height(18),
+                            0, ScreenAdaper.height(18)),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text('${v["title"]}',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    color: this._selectIndex == v['id']
+                                        ? Colors.red
+                                        : Colors.black)),
+                            this._showIcon(v['id'])
+                          ],
+                        ))));
+          }).toList())),
     );
   }
 
