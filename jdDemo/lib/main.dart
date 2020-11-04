@@ -4,7 +4,7 @@
  * @Author: wg
  * @Date: 2020-09-21 14:04:15
  * @LastEditors: wg
- * @LastEditTime: 2020-09-21 14:54:52
+ * @LastEditTime: 2020-11-04 13:51:20
  */
 import 'package:flutter/material.dart';
 
@@ -19,6 +19,8 @@ class MyApp extends StatelessWidget {
       title: 'jdDemo',
       initialRoute: '/',
       onGenerateRoute: onGenerateRoute,
+      theme: ThemeData(primaryColor: Colors.white),
+      debugShowCheckedModeBanner: false,
     );
   }
 }

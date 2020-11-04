@@ -4,7 +4,7 @@
  * @Author: wg
  * @Date: 2020-09-21 14:28:33
  * @LastEditors: wg
- * @LastEditTime: 2020-10-28 15:09:01
+ * @LastEditTime: 2020-11-04 14:20:13
  */
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
@@ -171,11 +171,58 @@ class _CategoryPageState extends State<CategoryPage>
     var rightItemWidth =
         (ScreenAdaper.getScreenWidth() - leftWidth - 20 - 20) / 3;
     var rightItemHeight = rightItemWidth + ScreenAdaper.width(40);
-    return Row(
-      children: [
-        this._leftCateWidget(leftWidth),
-        this._rightCateWidget(rightItemWidth, rightItemHeight)
-      ],
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          icon: Icon(Icons.center_focus_strong),
+          onPressed: () {
+            return null;
+          },
+        ),
+        title: InkWell(
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          onTap: () {
+            Navigator.of(context).pushNamed('/search');
+          },
+          child: Container(
+            height: ScreenAdaper.height(76),
+            padding: EdgeInsets.fromLTRB(ScreenAdaper.width(20), 0, 0, 0),
+            decoration: BoxDecoration(
+              color: Color.fromRGBO(233, 233, 233, 0.8),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Icon(Icons.search),
+                Text(
+                  '笔记本',
+                  style: TextStyle(fontSize: ScreenAdaper.setSize(28)),
+                )
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          IconButton(
+            splashColor: Colors.transparent,
+            highlightColor: Colors.transparent,
+            icon: Icon(Icons.message),
+            onPressed: () {
+              return null;
+            },
+          )
+        ],
+      ),
+      body: Row(
+        children: [
+          this._leftCateWidget(leftWidth),
+          this._rightCateWidget(rightItemWidth, rightItemHeight)
+        ],
+      ),
     );
   }
 }

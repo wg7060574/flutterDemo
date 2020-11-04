@@ -4,18 +4,20 @@
  * @Author: wg
  * @Date: 2020-09-21 14:42:47
  * @LastEditors: wg
- * @LastEditTime: 2020-10-28 15:06:49
+ * @LastEditTime: 2020-11-04 14:15:56
  */
 
 import 'package:flutter/material.dart';
 
 import '../pages/tabs/Tabs.dart';
 import '../pages/ProductList.dart';
+import '../pages/Search.dart';
 
 final routes = {
   '/': (context) => Tabs(),
   '/productList': (context, {arguments}) =>
-      ProductListPage(arguments: arguments)
+      ProductListPage(arguments: arguments),
+  '/search': (context) => SearchPage()
 };
 
 var onGenerateRoute = (RouteSettings settings) {

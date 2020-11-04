@@ -4,7 +4,7 @@
  * @Author: wg
  * @Date: 2020-09-21 14:28:33
  * @LastEditors: wg
- * @LastEditTime: 2020-10-28 14:13:08
+ * @LastEditTime: 2020-11-04 14:19:19
  */
 import 'package:flutter/material.dart';
 
@@ -225,14 +225,61 @@ class _HomePageState extends State<HomePage>
   @override
   Widget build(BuildContext context) {
     ScreenAdaper.init(context);
-    return ListView(
-      children: [
-        this._swiperWidget(),
-        this._titleWidget('猜你喜欢'),
-        this._guessProductListWidget(),
-        this._titleWidget('热门推荐'),
-        this._hotProductListWidget()
-      ],
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          icon: Icon(Icons.center_focus_strong),
+          onPressed: () {
+            return null;
+          },
+        ),
+        title: InkWell(
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          onTap: () {
+            Navigator.of(context).pushNamed('/search');
+          },
+          child: Container(
+            height: ScreenAdaper.height(76),
+            padding: EdgeInsets.fromLTRB(ScreenAdaper.width(20), 0, 0, 0),
+            decoration: BoxDecoration(
+              color: Color.fromRGBO(233, 233, 233, 0.8),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Icon(Icons.search),
+                Text(
+                  '笔记本',
+                  style: TextStyle(fontSize: ScreenAdaper.setSize(28)),
+                )
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          IconButton(
+            splashColor: Colors.transparent,
+            highlightColor: Colors.transparent,
+            icon: Icon(Icons.message),
+            onPressed: () {
+              return null;
+            },
+          )
+        ],
+      ),
+      body: ListView(
+        children: [
+          this._swiperWidget(),
+          this._titleWidget('猜你喜欢'),
+          this._guessProductListWidget(),
+          this._titleWidget('热门推荐'),
+          this._hotProductListWidget()
+        ],
+      ),
     );
   }
 }

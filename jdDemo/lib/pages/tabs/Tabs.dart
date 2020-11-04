@@ -4,9 +4,10 @@
  * @Author: wg
  * @Date: 2020-09-21 14:27:35
  * @LastEditors: wg
- * @LastEditTime: 2020-10-28 14:41:21
+ * @LastEditTime: 2020-11-04 14:18:43
  */
 import 'package:flutter/material.dart';
+import '../../service/ScreenAdaper.dart';
 
 import './Home.dart';
 import './Category.dart';
@@ -35,13 +36,17 @@ class _TabsState extends State<Tabs> {
 
   @override
   Widget build(BuildContext context) {
+    ScreenAdaper.init(context);
     return Scaffold(
-      appBar: AppBar(
-        title: Text('jd'),
-      ),
       body: PageView(
         controller: this._pageController,
         children: this._pageList,
+        onPageChanged: (index) {
+          setState(() {
+            this._currentIndex = index;
+          });
+        },
+        physics: NeverScrollableScrollPhysics(), // 禁止滑动
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
