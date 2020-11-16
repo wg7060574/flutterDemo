@@ -3,8 +3,8 @@
  * @version: 
  * @Author: wg
  * @Date: 2020-10-28 14:48:14
- * @LastEditors: wg
- * @LastEditTime: 2020-11-04 13:27:26
+ * @LastEditors: Please set LastEditors
+ * @LastEditTime: 2020-11-10 14:00:24
  */
 import 'package:flutter/material.dart';
 import '../service/ScreenAdaper.dart';

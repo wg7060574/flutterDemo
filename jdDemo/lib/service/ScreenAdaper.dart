@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class ScreenAdaper {
+class ScreenAdaper { 
   // 初始化
   static init(context) {
     ScreenUtil.init(designSize: Size(750, 1334));
